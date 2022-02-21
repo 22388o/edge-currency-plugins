@@ -180,7 +180,7 @@ export interface MakeTxArgs {
   utxos: IUTXO[]
   targets: MakeTxTarget[]
   feeRate: number
-  setRBF: boolean
+  enableRbf: boolean
   coin: string
   freshChangeAddress: string
   subtractFee?: boolean
@@ -831,9 +831,11 @@ export function signMessageBase64(message: string, privateKey: string): string {
 
 export async function makeTx(args: MakeTxArgs): Promise<MakeTxReturn> {
   let sequence = 0xffffffff
-  if (args.setRBF) {
+  if (args.enableRbf) {
     sequence -= 2
   }
+  console.log('enableRbf', args.enableRbf)
+  console.log('sequence', sequence)
 
   // get coin specific replay protection sighhash bits
   let sighashType = bitcoin.Transaction.SIGHASH_ALL

@@ -171,7 +171,7 @@ describe('bitcoin transaction creation and signing test', function () {
     const { psbtBase64 } = await makeTx({
       forceUseUtxo: [],
       coin: 'bitcoin',
-      setRBF: false,
+      enableRbf: false,
       freshChangeAddress: '1KRMKfeZcmosxALVYESdPNez1AP1mEtywp',
       feeRate: 0,
       subtractFee: false,
@@ -224,7 +224,7 @@ describe('bitcoin transaction creation and signing test', function () {
     const { psbtBase64 } = await makeTx({
       forceUseUtxo: [],
       coin: 'bitcoin',
-      setRBF: false,
+      enableRbf: false,
       freshChangeAddress: segwitAddress,
       feeRate: 0,
       subtractFee: false,
@@ -288,7 +288,7 @@ describe('bitcoin transaction creation and signing test', function () {
     const { psbtBase64 } = await makeTx({
       forceUseUtxo: [getUtxo(0), getUtxo(1), getUtxo(2, '0')],
       coin: 'bitcoin',
-      setRBF: false,
+      enableRbf: false,
       freshChangeAddress: segwitAddress,
       feeRate: 0,
       subtractFee: false,
@@ -361,7 +361,7 @@ describe('bitcoin transaction creation and signing test', function () {
     const { psbtBase64 } = await makeTx({
       forceUseUtxo: [utxoLegacy, utxoSegwit, utxoWrappedSegwit],
       coin: 'bitcoin',
-      setRBF: false,
+      enableRbf: false,
       freshChangeAddress: address,
       feeRate: 0,
       subtractFee: false,
@@ -411,7 +411,7 @@ describe('bitcoin transaction creation and signing test', function () {
     const { psbtBase64 } = await makeTx({
       forceUseUtxo: [],
       coin: 'bitcoin',
-      setRBF: false,
+      enableRbf: false,
       freshChangeAddress: address,
       feeRate: 0,
       subtractFee: false,
@@ -443,7 +443,7 @@ describe('bitcoin transaction creation and signing test', function () {
     const { psbtBase64: psbtBase64Multi } = await makeTx({
       forceUseUtxo: [],
       coin: 'bitcoin',
-      setRBF: false,
+      enableRbf: false,
       freshChangeAddress: address,
       feeRate: 0,
       subtractFee: false,
