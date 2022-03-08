@@ -25,6 +25,7 @@ export const currencyInfo: EdgeCurrencyInfo = {
     ]),
     disableFetchingServers: false
   },
+  canReplaceByFee: true,
   customFeeTemplate: [
     {
       type: 'nativeAmount',

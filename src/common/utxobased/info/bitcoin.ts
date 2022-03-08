@@ -36,6 +36,7 @@ const currencyInfo: EdgeCurrencyInfo = {
       displayMultiplier: '0'
     }
   ],
+  canReplaceByFee: true,
   metaTokens: [],
 
   // Explorers:
