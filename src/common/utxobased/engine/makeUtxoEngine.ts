@@ -392,13 +392,14 @@ export async function makeUtxoEngine(
       nativeAmount = bs.sub(nativeAmount, networkFee)
 
       const otherParams: UtxoTxOtherParams = {
+        edgeSpendInfo,
+        ourScriptPubkeys,
         psbt: {
           base64: tx.psbtBase64,
           inputs: tx.inputs,
           outputs: tx.outputs
         },
-        edgeSpendInfo,
-        ourScriptPubkeys
+        rbfTxid
       }
 
       const transaction = {
@@ -437,6 +438,23 @@ export async function makeUtxoEngine(
     },
 
     async saveTx(edgeTx: EdgeTransaction): Promise<void> {
+      // Update rbfTxid if it exists
+      const rbfTxid: string | undefined = edgeTx.otherParams?.rbfTxid
+      if (rbfTxid != null) {
+        // Get the replaced transaction using the rbfTxid
+        const [rbfTx] = await processor.fetchTransactions({ txId: rbfTxid })
+        if (rbfTx != null) {
+          rbfTx.blockHeight = -1
+          await transactionChanged({
+            tx: rbfTx,
+            pluginInfo,
+            emitter,
+            walletTools,
+            processor
+          })
+        }
+      }
+
       const tx = fromEdgeTransaction(edgeTx)
       await transactionChanged({
         tx,
