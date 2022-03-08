@@ -480,18 +480,27 @@ export async function makeUtxoEngine(
           )
         } else {
           return await Promise.all(
-            psbt.inputs.map(async ({ hash, index }) => {
-              const txid = Buffer.from(hash).reverse().toString('hex')
+            psbt.inputs.map(async ({ hash, index: vout }) => {
+              // Get the scriptPubkey of the prevout from the input's txid and
+              // vout (index).
+              const txId = Buffer.from(hash).reverse().toString('hex')
+              const [transaction] = await processor.fetchTransactions({ txId })
+              if (transaction == null)
+                throw new Error(
+                  'Unable to find previous transaction data for input'
+                )
+              const prevout = transaction.outputs.find(
+                input => input.n === vout
+              )
+              if (prevout == null)
+                throw new Error('Unable to find prevout in transaction')
+              const { scriptPubkey } = prevout
 
-              const [utxo] = await processor.fetchUtxos({
-                utxoIds: [`${txid}_${index}`]
-              })
-              if (utxo == null) throw new Error('Invalid UTXO')
-
-              const address = await processor.fetchAddress(utxo.scriptPubkey)
+              // Use the scriptPubkey to find the private key from the address
+              // derivation path
+              const address = await processor.fetchAddress(scriptPubkey)
               if (address?.path == null)
                 throw new Error('Invalid script pubkey')
-
               return walletTools.getPrivateKey({
                 path: address.path,
                 xprivKeys
