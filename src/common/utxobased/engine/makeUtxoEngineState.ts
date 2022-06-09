@@ -680,6 +680,8 @@ export const pickNextTask = async (
     }
   }
 
+  const blockHeight = serverStates.getBlockHeight(uri)
+
   // Loop unparsed utxos, some require a network call to get the full tx data
   for (const [utxoString, state] of Object.entries(rawUtxoCache)) {
     const utxo: BlockbookAccountUtxo = JSON.parse(utxoString)
@@ -701,7 +703,8 @@ export const pickNextTask = async (
         ...state,
         address: state.address,
         utxo,
-        id: `${utxo.txid}_${utxo.vout}`
+        id: `${utxo.txid}_${utxo.vout}`,
+        blockHeight
       })
       return wsTask ?? true
     }
@@ -737,7 +740,6 @@ export const pickNextTask = async (
     Object.keys(addressSubscribeCache).length > 0 &&
     !taskCache.addressWatching
   ) {
-    const blockHeight = serverStates.getBlockHeight(uri)
     // Loop each address that needs to be subscribed
     for (const [address, state] of Object.entries(addressSubscribeCache)) {
       // Add address in the cache to the set of addresses to watch
@@ -792,7 +794,11 @@ export const pickNextTask = async (
         hasProcessedAtLeastOnce = true
         state.processing = true
         removeItem(updateTransactionCache, txId)
-        const updateTransactionTask = updateTransactions({ ...args, txId })
+        const updateTransactionTask = updateTransactions({
+          ...args,
+          txId,
+          blockHeight
+        })
         // once resolved, add the txid to the server cache
         updateTransactionTask.deferred.promise
           .then(() => {
@@ -835,6 +841,7 @@ export const pickNextTask = async (
 
 interface UpdateTransactionsArgs extends CommonArgs {
   txId: string
+  blockHeight: number
 }
 
 const updateTransactions = (
@@ -1073,18 +1080,32 @@ const processAddressTransactions = async (
   }
 }
 
-interface ProcessRawTxArgs extends CommonArgs {
+export interface ProcessRawTxArgs extends CommonArgs {
   tx: TransactionResponse
+  blockHeight: number
 }
 
 const processRawTx = (args: ProcessRawTxArgs): IProcessorTransaction => {
   const {
     tx,
-    pluginInfo: { coinInfo }
+    pluginInfo: { coinInfo, engineInfo, currencyInfo }
   } = args
+  const { requiredConfirmations = 1 } = currencyInfo
+
+  const confirmations: 'unconfirmed' | 'confirmed' | number =
+    tx.confirmations <= 0
+      ? 'unconfirmed'
+      : tx.confirmations >= requiredConfirmations
+      ? 'confirmed'
+      : tx.confirmations
+
   return {
     txid: tx.txid,
     hex: tx.hex,
+    confirmations:
+      engineInfo.validateConfirmations != null
+        ? engineInfo.validateConfirmations(args)
+        : confirmations,
     // Blockbook can return a blockHeight of -1 when the tx is pending in the mempool
     blockHeight: tx.blockHeight > 0 ? tx.blockHeight : 0,
     date: tx.blockTime,
@@ -1255,6 +1276,7 @@ interface ProcessRawUtxoArgs extends CommonArgs {
   id: string
   address: IAddress
   uri: string
+  blockHeight: number
 }
 
 const processRawUtxo = async (

@@ -38,6 +38,7 @@ export const fromEdgeTransaction = (
     blockHeight: tx.blockHeight,
     date: tx.date,
     fees: tx.networkFee,
+    confirmations: tx.confirmations ?? 'unconfirmed',
     inputs: inputs,
     outputs: outputs,
     // We can leave ourIns/ourOuts blank because they'll be updated by the
@@ -68,7 +69,7 @@ export const toEdgeTransaction = async (
     const address = await processor.fetchAddress(scriptPubkey)
 
     /*
-    Hack to set replay protection tx to the correct script type through the 
+    Hack to set replay protection tx to the correct script type through the
     address format.
 
     We use a function which can determine whether the derivationLevelScriptHash
@@ -103,6 +104,7 @@ export const toEdgeTransaction = async (
     nativeAmount: args.tx.ourAmount,
     networkFee: args.tx.fees,
     signedTx: args.tx.hex,
+    confirmations: args.tx.confirmations,
     ourReceiveAddresses
   }
 }

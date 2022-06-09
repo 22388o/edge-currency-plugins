@@ -45,6 +45,7 @@ export interface IUTXO {
 export interface IProcessorTransaction {
   txid: string
   hex: string
+  confirmations: 'unconfirmed' | 'confirmed' | number
   blockHeight: number
   date: number
   fees: string

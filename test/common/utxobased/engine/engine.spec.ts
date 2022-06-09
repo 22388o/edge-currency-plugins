@@ -79,10 +79,6 @@ describe('engine.spec', function () {
         fakeLogger.info('onBalanceChange:', currencyCode, balance)
         emitter.emit('onBalanceChange', currencyCode, balance)
       },
-      onBlockHeightChanged(height) {
-        fakeLogger.info('onBlockHeightChange:', height)
-        emitter.emit('onBlockHeightChange', height)
-      },
       onStakingStatusChanged() {},
       onTransactionsChanged(transactionList) {
         fakeLogger.info('onTransactionsChanged:', transactionList)

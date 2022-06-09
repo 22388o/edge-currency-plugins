@@ -415,6 +415,7 @@ export async function makeUtxoEngine(
         currencyCode: currencyInfo.currencyCode,
         txid: '',
         date: unixTime(),
+        confirmations: 'unconfirmed',
         blockHeight: 0,
         nativeAmount,
         networkFee,
